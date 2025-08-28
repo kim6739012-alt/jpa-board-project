@@ -1,7 +1,7 @@
 # JPA 게시판 프로젝트
 
 이 프로젝트는 **Spring Boot + JPA** 기반의 간단한 게시판 웹 애플리케이션입니다.  
-회원 기능, 게시글, 댓글 CRUD, 관리자 대시보드 등 **웹 서비스의 기본 요소들을 전반적으로 다룹니다.**
+회원 기능, 게시글, 댓글 CRUD, 관리자 대시보드, OKR 관리 등 **웹 서비스의 기본 요소들을 전반적으로 다룹니다.**
 
 ---
 
@@ -55,11 +55,24 @@
 ### 🆕 OKR 기능
 
 - **OKR 관리**: 사용자별 목표(Objective) 및 핵심 결과(Key Result) 등록    
-- **핵심 결과 수정 가능**: 기존 OKR 수정 시 핵심 결과 내용도 함께 수정, 핵심 결과 3~5개 개수 제한  
+- **핵심 결과 개수 제한**: 최소 3개, 최대 5개 등록 가능  
 - **OKR 목록 화면**: 작성한 OKR 전체 확인 가능, 설명 및 핵심 결과 함께 표시  
 - **목표 추가 버튼**: OKR 리스트 페이지에서 새 목표를 추가할 수 있는 버튼 제공  
 - **메인 페이지 이동 버튼**: OKR 리스트에서 메인으로 돌아가기 버튼 제공  
 - **삭제 시 리다이렉트 처리**: OKR 삭제 후 자동으로 리스트 페이지로 이동  
+
+#### ➕ 확장 기능
+
+- **핵심 결과 진행률 관리**  
+  - **BINARY**: 완료/미완료 토글  
+  - **NUMERIC**: 현재 값 입력하여 진행 상황 업데이트  
+  - **MILESTONE**: 마일스톤 완료 +1 버튼 지원  
+- **D-Day 표시**: Objective 마감일까지 남은 일수 표시  
+- **일일 체크 기능**: 오늘의 핵심 결과 실천 여부 기록 가능  
+- **주간 체크 기능**:  
+  - 한 주(월~일) 단위로 KR 체크 내역을 테이블로 확인  
+  - 날짜별 체크 여부를 버튼 클릭으로 토글 가능  
+  - 주간 진행 상황을 **일자별 완료율 그래프**로 시각화  
 
 ---
 
@@ -70,13 +83,13 @@ src
  └─ main
      ├─ java
      │   └─ com.example.start
-     │       ├─ controller       # 요청 처리 컨트롤러 (AdminController, UserController, PostController, CommentController, ObjectiveController)
-     │       ├─ dto              # DTO 객체 (PostForm, CommentForm, ObjectiveForm, KeyResultForm)
-     │       ├─ entity           # JPA 엔티티 (User, Post, Comment, Objective, KeyResult)
-     │       ├─ enums            # 열거형 타입 (ReactionType)
-     │       ├─ repository       # 데이터 접근 레이어
+     │       ├─ controller       # 요청 처리 컨트롤러 (AdminController, UserController, PostController, CommentController, ObjectiveController, KeyResultController, WeeklyOKRController)
+     │       ├─ dto              # DTO 객체 (PostForm, CommentForm, ObjectiveForm, KeyResultForm, KeyResultResponse, ObjectiveResponse)
+     │       ├─ entity           # JPA 엔티티 (User, Post, Comment, Objective, KeyResult, DailyCheck)
+     │       ├─ enums            # 열거형 타입 (ReactionType, KRType)
+     │       ├─ repository       # 데이터 접근 레이어 (UserRepository, PostRepository, CommentRepository, ObjectiveRepository, KeyResultRepository, DailyCheckRepository)
      │       ├─ service          # 서비스 인터페이스
-     │       └─ service.impl     # 서비스 구현체
+     │       └─ service.impl     # 서비스 구현체 (PostServiceImpl, CommentServiceImpl, ObjectiveServiceImpl, DailyCheckServiceImpl ...)
      └─ resources
          ├─ templates
          │   ├─ admin
@@ -86,6 +99,7 @@ src
          │   │   └─ comment-list.html
          │   ├─ okr
          │   │   ├─ list.html
+         │   │   ├─ weekly.html
          │   │   ├─ create.html
          │   │   └─ edit.html
          │   ├─ login.html
@@ -97,20 +111,33 @@ src
          │   ├─ signup.html
          │   └─ user-info.html
          └─ application.properties
+```
 
-실행 방법
-1. MySQL에서 boarddb 데이터베이스 생성
-2. application.properties에서 DB 연결 정보 확인
-3. 프로젝트 빌드 및 실행
+---
 
+## 실행 방법
+
+1. MySQL에서 `boarddb` 데이터베이스 생성  
+2. `application.properties`에서 DB 연결 정보 확인  
+3. 프로젝트 빌드 및 실행  
+
+```bash
 # macOS / Linux
 ./mvnw spring-boot:run
 
 # Windows
 mvnw.cmd spring-boot:run
+```
 
-4. 브라우저에서 http://localhost:8080 접속
+4. 브라우저에서 http://localhost:8080 접속  
 
-시연 예시
-로그인 → 글쓰기 → 댓글 작성 → OKR 작성 → 관리자 로그인 → 회원/게시글/댓글 관리
+---
 
+## 시연 예시
+
+1. 회원가입 → 로그인  
+2. 게시글 작성 → 댓글 작성  
+3. OKR 작성 (Objective + Key Result 3~5개)  
+4. 오늘의 KR 체크 (일일 체크)  
+5. 주간 체크 페이지 → 각 요일별 진행 상황 확인 → 그래프에서 진행률 시각화  
+6. 관리자 로그인 → 회원/게시글/댓글 관리
